@@ -1,43 +1,28 @@
 class Kong < Formula
+  homepage "https://getkong.org"
   desc "Open source Microservices and API Gateway"
-  homepage "https://docs.konghq.com"
 
   stable do
-    url "https://bintray.com/kong/kong-community-edition-src/download_file?file_path=dists%2Fkong-community-edition-0.14.0.tar.gz"
-    sha256 "21593e04f7e14624643474cec0eb9c1fe5192622a8c2b45a9eee405c3cf244db"
-    depends_on "kong/kong/openresty@1.13.6.2"
+    url "https://bintray.com/kong/kong-community-edition-src/download_file?file_path=dists%2Fkong-community-edition-0.14.1.tar.gz"
+    sha256 "945a90568838ffb7ee89e6816576a26aae0e860b5ff0a4c396f4299062eb0001"
   end
 
-  devel do
-    url "https://github.com/Kong/kong.git", :tag => "1.3.0rc2"
-    depends_on "kong/kong/openresty@1.15.8.1"
-  end
+  #devel do
+  # url "https://github.com/Kong/kong.git", :tag => "0.13.0rc2"
+  #end
 
   head do
     url "https://github.com/Kong/kong.git", :branch => "next"
-    depends_on "kong/kong/openresty@1.15.8.1"
   end
-
-  depends_on "libyaml"
 
   patch :DATA
 
+  depends_on "openssl"
+  depends_on "kong/kong/openresty@1.13.6.2"
+  depends_on "kong/kong/openresty@1.13.6.2/luarocks"
+
   def install
-    openresty_prefix = Formula["kong/kong/openresty@1.13.6.2"].prefix
-
-    if build.head? or build.devel? then
-      openresty_prefix = Formula["kong/kong/openresty@1.15.8.1"].prefix
-    end
-
-    luarocks_prefix = openresty_prefix + "luarocks"
-    openssl_prefix = openresty_prefix + "openssl"
-
-    system "#{luarocks_prefix}/bin/luarocks",
-           "--tree=#{prefix}",
-           "make",
-           "CRYPTO_DIR=#{openssl_prefix}",
-           "OPENSSL_DIR=#{openssl_prefix}"
-
+    system "luarocks-5.1 --tree=#{prefix} make CRYPTO_DIR=#{Formula['openssl'].opt_prefix} OPENSSL_DIR=#{Formula['openssl'].opt_prefix}"
     bin.install "bin/kong"
   end
 end
